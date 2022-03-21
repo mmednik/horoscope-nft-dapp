@@ -1,8 +1,10 @@
-import logo from "./logo.svg";
 import "./App.css";
 
 import { useEffect, useState } from "react";
 import { Contract, providers } from "ethers";
+import NFT from "./abi/horoscopeNFT.json";
+
+const NFT_CONTRACT_ADDRESS = "0x429ef7b017fD77e00980Ab0A25798326E5b64e1E";
 
 function App() {
   const [isWalletInstalled, setIsWalletInstalled] = useState(false);
@@ -115,7 +117,26 @@ function App() {
       } else {
         setZodiacSign("Sagittarius");
       }
-    } 
+    }
+  }
+
+  useEffect(() => {
+    function initNFTContract() {
+      const provider = new providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      setNFTContract(new Contract(NFT_CONTRACT_ADDRESS, NFT.abi, signer));
+    }
+    initNFTContract();
+  }, [account]);
+
+  async function mintNFT() {
+    setIsMinting(true);
+    try {
+      await NFTContract.mintNFT(account, zodiacSign);
+    } catch (e) {
+    } finally {
+      setIsMinting(false);
+    }
   }
 
   if (account === null) {
@@ -136,7 +157,8 @@ function App() {
       <h1>🔮 Horoscope NFT minting dApp 🔮</h1>
       <p>Connected as: {account}</p>
       <input onChange={handleDateInput} value={date} type="date" id="dob" />
-      <br /><br />
+      <br />
+      <br />
       {zodiacSign ? (
         <svg
           width="350"
@@ -148,12 +170,11 @@ function App() {
             <rect id="background" fill="black" height="100%" width="100%" />
             <text
               id="word-bg-1"
-              font-size="200px"
-              font-family="serif"
+              fontSize="200px"
+              fontFamily="serif"
               fill="#111111"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              class="base"
+              textAnchor="middle"
+              dominantBaseline="middle"
               y="50%"
               x="50%"
             >
@@ -161,12 +182,11 @@ function App() {
             </text>
             <text
               id="word-bg-2"
-              font-size="200px"
-              font-family="serif"
+              fontSize="200px"
+              fontFamily="serif"
               fill="#222222"
-              text-anchor="top"
-              dominant-baseline="top"
-              class="base"
+              textAnchor="top"
+              dominantBaseline="top"
               y="5%"
               x="-20%"
             >
@@ -174,12 +194,11 @@ function App() {
             </text>
             <text
               id="word-bg-3"
-              font-size="200px"
-              font-family="serif"
+              fontSize="200px"
+              fontFamily="serif"
               fill="#222222"
-              text-anchor="bottom"
-              dominant-baseline="bottom"
-              class="base"
+              textAnchor="bottom"
+              dominantBaseline="bottom"
               y="120%"
               x="-50%"
             >
@@ -187,13 +206,12 @@ function App() {
             </text>
             <text
               id="word"
-              font-size="30px"
-              font-family="sans"
-              font-weight="bold"
+              fontSize="30px"
+              fontFamily="sans"
+              fontWeight="bold"
               fill="white"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              class="base"
+              textAnchor="middle"
+              dominantBaseline="middle"
               y="50%"
               x="50%"
             >
@@ -202,8 +220,11 @@ function App() {
           </g>
         </svg>
       ) : null}
-      <br /><br />
-      <button>Mint</button>
+      <br />
+      <br />
+      <button isLoading={isMinting} onClick={mintNFT}>
+        Mint
+      </button>
     </div>
   );
 }
